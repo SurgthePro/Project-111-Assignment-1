@@ -1,0 +1,22 @@
+----- Create venv ------ venv are just the whole installation of packages--it has nothing to do with the VIRTUAL DOM in React.
+WINDOWS: py/python -m venv venv
+MacOS: python3 -m venv venv
+
+----- Activate venv -----
+WINDOWS: venv\Scripts\activate
+MacOS: source venv/bin/activate
+
+----- Install Flask -----
+pip install Flask
+
+----- Run server.py file -----
+WINDOWS: py/python server.py
+MacOS: python3 server.py
+
+Note: Also create a .gitignore file under the project folder (this file is uniques in that it has a period at the front and does not have any extension at the end).
+The .gitignore file is used for the purpose of how you send/share files to GitHub.
+We don't want to push the virtual environment, and also, we want to ignore all the files that have the db extension. Why? Bc those may have sensitive info we don't want to make public.
+Files that have a db extension are database files that have data that needs to be secure (safeguarded).
+
+Note: We create the venv here in this file with its cp terminal. Here, we also activate venv, install Flask, but we run the server with the server.py file (at its own cp terminal).
+Note: Creating the venv automatically creates a venv folder.
