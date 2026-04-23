@@ -66,6 +66,97 @@ def register():
         "message": "Data added successfully!"
     }), 201 # created (status code)
 
+ # GET http:/127.0.0.1:5000/api/users/2
+@app.get('/api/users/<int:user_id>')
+def get_user_by_id(user_id):
+    #logic goes here
+
+    connection = sqlite3.connect(DB_NAME)
+    connection.row_factory = sqlite3.Row # Allows column's values to be retrieved by name, row=["username"]
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, username FROM users WHERE id=?", (user_id,))
+    row = cursor.fetchone()
+    print(dict(row))
+    user_information = dict(row)
+    connection.close()
+
+
+    return jsonify({
+        "success": True,
+        "message": "User retrieved successfully!",
+        "data": user_information
+
+    }), 200 #  OK 
+
+@app.get('/api/users')
+def get_users():
+    # logic goes here
+
+    connection = sqlite3.connect(DB_NAME)
+    connection.row_factory = sqlite3.Row 
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, username FROM users")
+    rows = cursor.fetchall()
+    print(rows)
+    connection.close()
+
+    users = []
+    for row in rows:
+        print(dict(row))
+        users.append(dict(row))
+
+    return jsonify({
+        "success": True,
+        "message": "Users retrieved successfully!"
+    }), 200 # OK
+
+# PUT
+@app.put('/api/users/<int:user_id>')
+def update_user(user_id):
+    updated_user = request.get_json()
+    username = updated_user["username"]
+    password = updated_user["password"]
+    # logic here:
+
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    # validation code goes here:
+    cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+    row = cursor.fetchone() 
+
+    if not row:
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "User not found!"
+        }), 404 #No Found
+    
+    cursor.execute("UPDATE users SET username= ?, password=? WHERE id=?", (username, password, user_id))
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "success": True,
+        "message": "User updated successfully!"
+    }), 200 # OK
+
+# DELETE
+@app.delete('/api/users/<int:user_id>')
+def delete_user(user_id):
+    # logic here
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "success": True,
+        "message": "User deleted successfully!"
+
+    }), 204 # OK
+
+
 # ----- EXPENSES ENDPOINT-----Here is where data is posted/created in its respective table.
 # The first general step is to create the basic structure of an endpoint, which is the following: the decorator with the request method and the path parameter; the function name; the return statement, which is basic with only adjustments made for the type of request method.
 # http://127.0.0.1:5000/api/expenses
@@ -99,6 +190,107 @@ def create_expense():
         "success": True,
         "message": "Expense created successfully!"
     }), 201
+
+# GET ALL EXPENSES:
+@app.get('/api/expenses')
+def get_expenses():
+
+    connection = sqlite3.connect(DB_NAME)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, title, description, amount, date, category FROM expenses")
+    rows = cursor.fetchall()
+    print(rows)
+    connection.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Expenses retrieved successfully!"
+    }), 200 # OK
+
+# GET a SINGLE EXPENSE BY ID:
+# GET http://127.0.0.1:5000/api/expenses/#
+@app.get('/api/expenses/<int:expense_id>')
+def get_expense_by_id(expense_id):
+    connection = sqlite3.connect(DB_NAME)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, title, description, amount, date, category  FROM expenses WHERE id=?", (expense_id,))
+    row = cursor.fetchone()
+    if not row:
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "Expense not found!"
+        }), 404 # Not Found
+    print(dict(row))
+    expense_information = dict(row)
+    connection.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Expense retrieved successfully!"
+    }), 200 # OK
+
+# UPDATE AN EXISTING EXPENSE:
+# PUT http://127.0.0.1:5000/api/expenses/#
+@app.put('/api/expenses/<int:expense_id>')
+def update_expense_by_id(expense_id):
+    updated_expense = request.get_json()
+    title = updated_expense["title"]
+    description = updated_expense["description"]
+    amount = updated_expense["amount"]
+    date = updated_expense["date"]
+    category = updated_expense["category"]
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM expenses WHERE id=?", (expense_id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "Expense not found!"
+        }), 404 #No Found
+    
+    if category != "Food" and category != "Education" and category != "Entertainment":
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "Expense not found!"
+        }), 404 #Not Found 
+    cursor.execute("UPDATE expenses SET title=?, description=?, amount=?, date=?, category=? WHERE id=?", (title, description, amount, date, category, expense_id))
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Update expense successfully!"
+    }), 200 # OK
+
+# DELETE A SPECIFIED EXPENSE:
+# DELETE http://127.0.0.1:5000/api/expenses/#
+@app.delete('/api/expenses/<int:expense_id>')
+def delete_expense_by_id(expense_id):
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM expenses WHERE id=?", (expense_id,))
+    row = cursor.fetchone()
+    if not row:
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "Expense not found!"
+        }), 404 #No Found
+    cursor.execute("DELETE FROM expenses WHERE id=?", (expense_id,))
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "success": "True",
+        "message": "Deleted expense successfully!"
+    }), 204 # No Content
 
 if __name__ == "__main__": # This is the code needed to run this application/file. This code is always placed at the end of the file. This tells the API to only execute this file when we are in it, but not when we're in a different file or if and when we are importing this as a module. This essentially is a validation.
     init_db() # Here we are executing the function to create the DB table.
