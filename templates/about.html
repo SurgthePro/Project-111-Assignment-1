@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+<!-- Note: This set of code is used to change the title label of the page up on the browser tab.-->
+         
+    {% block title %} 
+        About Page
+    {% endblock title %}
+
+    {% block content %}
+        <h1>About Page</h1>
+        <img src="https://th.bing.com/th/id/OIP.HaMpXsdO8wocYKI8FqZIPgHaLG?w=115&h=180&c=7&r=0&o=7&dpr=1.1&pid=1.7&rm=3"
+<!-- Note: In the following html lines combined with identifier variables, we are separating the data into it's individual propteries: -->
+        <p>name: {{student_data["name"]}}</p>
+        <p>cohort: {{student_data["cohort"]}}</p>
+        <p>year: {{student_data["year"]}}</p>
+    {% endblock content %}
+    

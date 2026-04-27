@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>{% block title %} {% endblock title %}</title> <!--Note: This makes the title up on the browser tab flexible/customizable on each individual templates html page.-->
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-secondary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">My Website</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{url_for('home')}}">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('about')}}">About</a> <!--Note: Here we are using special syntax with the double curly braces.  Inside of them we are inserting the function name that will render the page we are indicating on the right.-->
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('contact')}}">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+    <main> <!--Note: This sementic container can be changed to any type of container,so there's flexibility here.-->
+        {% block content %}
+        <!--Here goes the content from pages and/or py file.-->
+        {% endblock content %}
+    </main>
+    <footer>
+       <!--  ---This will be the footer. --- -->
+      <div>
+        <h3>Potential Clients:</h3>
+        <p>Please don't hesitate to call us if you should have any questions--simply refer to our Contact Page in the top navbar.</p>
+        <p>Looking forward to hearing from you!</p>
+      </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script> <!--This is obtained from the Bootstrap website-- a CDN documentation file link.-->
+</body>
+</html>

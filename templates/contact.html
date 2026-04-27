@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Contact Page
+{% endblock title %}
+
+{% block content %}
+    <h1>Contact Page</h1>
+    <div>
+    <div class="input-group mb-3">
+  <span class="input-group-text" id="basic-addon1">Name:</span>
+  <input type="text" class="form-control" placeholder="Enter your name" aria-label="Name" aria-describedby="basic-addon1">
+</div>
+
+<div class="input-group mb-3">
+  <input type="email" class="form-control" placeholder="Enter your email address" aria-label="Email Address:" aria-describedby="basic-addon2">
+  <span class="input-group-text" id="basic-addon2">@example.com</span>
+</div>
+
+
+<div class="input-group">
+  <textarea class="form-control" aria-label="With textarea">Message:</textarea>
+</div>
+<button>Send</button>
+</div>
+    <h3>My Contact Info:</h3>
+    <p>email address: {{contact_info["email"]}}</p> 
+    <p>phone number: {{contact_info.phone}}</p>
+    <p>mailing address: {{contact_info["mailing_address"]}}</p>
+{% endblock content %}

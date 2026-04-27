@@ -1,0 +1,22 @@
+<!--When first creating this file add the boilerplate essentials by tpying: ! and hitting enter. But later, this boilerplate will be removed entirely. -->
+{% extends 'base.html' %}
+    {% block title %} <!--This set of code is optional--you don't have to use it.-->
+     Index Page
+    {% endblock title %}
+
+`   {% block content %} <!-- The work block is a keyword, but the word content can be any word it can be general (as it is here) or it can be more specific, as you the developer wish, but the same word should match the one after the endblock keyword.-->
+    <div>    
+    <h1>Home Page</h1>
+    </div>
+    <div class="sales-pitch">
+        <h4>Hello, I am {{name}}</h4> <!-- Note: Here name functions as a variable (it's referred to as an identifier) is essentially renders data that is sent from the logic of a py file. Note: The special syntax that uses double curly braces to wrap the identifier variable. -->
+        <p>I am for sale in the Riverside area of Southern California.</p>
+        <p>I am a quarter horse stallion bread for competition reining performance.</p>
+        <p>I am well-trained, well-mannered, and sensitive to my rider's every command and cue.</p>
+        <p>My owner is asking a reasonable price for anyone who wants a competition horse that is consistent in his performance.</p>
+        <p>I hope you'll come visit because I know you'll be greatly impressed and who knows--we may hit it off.</p>
+    </div>
+        <img src="https://wallpaperaccess.com/full/5008836.jpg"> 
+
+    {% endblock content %}
+    

@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request
-import sqlite3
+from flask import Flask, jsonify, request, render_template
+import sqlite3 # Note: This is imported here (it's not installed in our computer).  We could also install (and download) it to get more tools to work with, such as using our terminal to interact with our database (sqlite.org).  But here, we are using VS code to work with that database engine.
 
 app = Flask(__name__) # This is needed to begin creating this Flask API with a database.  Here, we create an instance of Flask. Note: app is a variable.
 
@@ -31,7 +31,7 @@ def init_db(): # This is a Python function that is used all the time with DB's (
         )           
     """ )
   # In the code directly above, the words in small text are the words than can change, depending on your particular DB (its name and its properties).  That is where SQL commands are inserted. Note: It can be written in one long line--but that's hard for us to read visually.  This is why we use triple double quotes--to write in shorter lines of code. Note: "IF NOT EXISTS" is a validation that is added here (but it's not absolutely necessary--it just helps us avoid a servious problem). 
-    connection.commit() # Save changes to the D.B. This is also part of the basic structure of a Flask-DB API. This step is not needed when you are reading/selecting data.
+    connection.commit() # Save changes to the D.B. This is also part of the basic structure of a Flask-DB API. This step is not needed when you are reading/selecting/getting data.
     connection.close() # Close the connection to the D.B.  This is also part of the basic structure of a Flask-DB API. 
 # Note: The following commented-out lines of code are an alternatve way of creating an endpoint, such as the one below it (only the first code line is different).
 # @app.route('/api/health' , methods=["GET"])
@@ -64,74 +64,81 @@ def register():
     return jsonify({
         "success": True, 
         "message": "Data added successfully!"
-    }), 201 # created (status code)
+    }), 201 # created (status code)'
 
- # GET http:/127.0.0.1:5000/api/users/2
+ # GET http:/127.0.0.1:5000/api/users/# Note: Here, since this URL can be tailored/customized to any number/user we may choose, we therefore need a path parameter ('/api/table_name/<type:table_primary_key_name>').
 @app.get('/api/users/<int:user_id>')
 def get_user_by_id(user_id):
-    #logic goes here
-
-    connection = sqlite3.connect(DB_NAME)
-    connection.row_factory = sqlite3.Row # Allows column's values to be retrieved by name, row=["username"]
-    cursor = connection.cursor()
-    cursor.execute("SELECT id, username FROM users WHERE id=?", (user_id,))
-    row = cursor.fetchone()
-    print(dict(row))
-    user_information = dict(row)
+    #logic goes here:
+    connection = sqlite3.connect(DB_NAME) # To work with the database, this is Step # 1.
+    connection.row_factory = sqlite3.Row #  This code line is only needed when we are accessing/reading data (only); allows column's values to be retrieved by name, row=["username"], so this syntax helps us access and read info/data that we indicate. We have already been introduced to the syntax for accessing a value from a dictionary (where we use square brackets, double quotes, and then the property).  If we don't have this line, we are not going to be able to work with square brackets.  In that case, we would need to use parentheses, and then work with SQLite objects and tuples, and numbers (integers).  With only a few columns, it's fairly easy to remember them, but if you're dealing with a much larger number of columns, this method will become very difficult to manage.  Column names are much easier to recall, therefore this approach is better.
+    cursor = connection.cursor() # This enables the cursor tool to send the various types of requests.
+    cursor.execute("SELECT id, * FROM users WHERE id=?", (user_id,)) # users is our DB table name; id is our designated primary key (id--identifier); username is a column name (field name), if you want to select all the table columns, use * (which means all columns); if you want to select more than one column, you need to separate every column by a comma (username, password); since we have path parameters, we are using WHERE (a keyword) to specify the ID (WHERE id=?", (user_id,) ) from the id column the id= the one that we are getting from that path parameter (user_id is the path parameter). Note: When working with tuples, it's necessary to include a comma at the end when there is only one tuple element. Also note: In most cases, you want to return almost everything--except a password (for security reasons).
+    row = cursor.fetchone() # Here, we are creating a variable called row to hold the value of one row.  Here, we are saying, once I have the value I want from the database, I need to unwrap the value (just like a box--we need to open it and take the value--that record). If you're getting a single value, you use "fetchone."  But if you're getting many values, then you use "fetchall."
+    print(dict(row)) # After accessing that value, we can now print out the dictionary row. This will display all the values in the dictionary row (Python only uses dictionaries--not objects).
+    user_information = dict(row) # Here we are creating a variable to hold/store our retrieved values.
     connection.close()
-
-
+    # Next basic part of an endpoint:
     return jsonify({
         "success": True,
         "message": "User retrieved successfully!",
-        "data": user_information
+        "data": user_information # This will allow the table data we requested to be displayed in ThunderClient.  
 
     }), 200 #  OK 
-
+# GET http://127.0.0.1:5000/api/users
 @app.get('/api/users')
 def get_users():
-    # logic goes here
+    # logic goes here:
+    connection = sqlite3.connect(DB_NAME) # Here, we start/open our connection with our database.
+    connection.row_factory = sqlite3.Row # Here, we use this code to make it easier for us to use column names instead of column integer numbers--this code is only needed for the GET request/query.
+    cursor = connection.cursor() # Here, we activate the cursor tool that helps us make requests to the database.
+    cursor.execute("SELECT id, username FROM users") # Here, we actually send SQL commands to the API, that connects to our database.
+    rows = cursor.fetchall() # fetchall() is used when we are getting many values--many rows of values.
+    print(rows) # Now we can display the values we got in our cp terminal.  However, rows is not easy to read.
+    connection.close() # Now we close our connection to our database.
 
-    connection = sqlite3.connect(DB_NAME)
-    connection.row_factory = sqlite3.Row 
-    cursor = connection.cursor()
-    cursor.execute("SELECT id, username FROM users")
-    rows = cursor.fetchall()
-    print(rows)
-    connection.close()
-
-    users = []
+    users = [] # This block of code will make the retrieved data easier to read-- bc this is better formatting.
     for row in rows:
         print(dict(row))
         users.append(dict(row))
 
+    # users = []
+    #for row in rows:
+    #   user = {
+    #     "id": row["id"],
+    #     "username": row["username"],
+    #     "password": row["password"]
+    #   }
+    #   users.append(user)
+
     return jsonify({
         "success": True,
-        "message": "Users retrieved successfully!"
+        "message": "Users retrieved successfully!",
+        "data": users
     }), 200 # OK
 
-# PUT
+# PUT -- Update a Single Record
+# PUT http://127.0.0.1:5000/api/users/#
 @app.put('/api/users/<int:user_id>')
 def update_user(user_id):
-    updated_user = request.get_json()
-    username = updated_user["username"]
-    password = updated_user["password"]
+    updated_user = request.get_json() # This line of code is used to get info/data from the client/user.
+    username = updated_user["username"] # This is one of the two properties of data the client/user will submit. This is where the data requested is separated into individual properties (column names).
+    password = updated_user["password"] # This is the other one of two properties of data the client/user will submit.
     # logic here:
-
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
-    # validation code goes here:
-    cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
-    row = cursor.fetchone() 
+    # validation code goes here (this is done as the last step--these lines of code up to "}), 404 # Not found" are inserted in between the code previously created.) It's a good idea to test this code without the validation first--makes troubleshooting easier:
+    cursor.execute("SELECT * FROM users WHERE id=?", (user_id,)) # When you have one proptery, you need to use a comma at the end.
+    row = cursor.fetchone() # fetchone() is used here bc we are getting one value.
 
-    if not row:
+    if not row: # If row is empty, do the following:
         connection.close()
         return jsonify({
             "success": False,
         "message": "User not found!"
         }), 404 #No Found
-    
-    cursor.execute("UPDATE users SET username= ?, password=? WHERE id=?", (username, password, user_id))
+    # Otherwise, do the following:
+    cursor.execute("UPDATE users SET username= ?, password=? WHERE id=?", (username, password, user_id)) # Here, we are only updating/modifying two properties (values of two column/field names). The username = ? means that the new username is whatever the user/client inputs; the new password is gonna be whatever the client/user inputs.  The last set of parentheses contains a Python tuple--last property of the tuple comes from the path parameter, the other two variables were defined in the previous codelines. The condition in this codeline is: WHERE id=?
     connection.commit()
     connection.close()
 
@@ -141,11 +148,22 @@ def update_user(user_id):
     }), 200 # OK
 
 # DELETE
+# http://127.0.0.1:5000/api/users/#
 @app.delete('/api/users/<int:user_id>')
 def delete_user(user_id):
     # logic here
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
+    # validation code goes here (this is done as the last step--these lines of code up to "}), 404 # Not found" are inserted in between the code previously created.) It's a good idea to test this code without the validation first--makes troubleshooting easier:
+    cursor.execute("SELECT * FROM users WHERE id=?", (user_id,)) # When you have one proptery, you need to use a comma at the end.
+    row = cursor.fetchone() # fetchone() is used here bc we are getting one value.
+
+    if not row: # If row is empty, do the following:
+        connection.close()
+        return jsonify({
+            "success": False,
+        "message": "User not found!"
+        }), 404 #No Found
     cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
     connection.commit()
     connection.close()
@@ -154,7 +172,7 @@ def delete_user(user_id):
         "success": True,
         "message": "User deleted successfully!"
 
-    }), 204 # OK
+    }), 204 # No content left
 
 
 # ----- EXPENSES ENDPOINT-----Here is where data is posted/created in its respective table.
@@ -205,7 +223,8 @@ def get_expenses():
 
     return jsonify({
         "success": True,
-        "message": "Expenses retrieved successfully!"
+        "message": "Expenses retrieved successfully!",
+        "data": expenses
     }), 200 # OK
 
 # GET a SINGLE EXPENSE BY ID:
@@ -229,7 +248,8 @@ def get_expense_by_id(expense_id):
 
     return jsonify({
         "success": True,
-        "message": "Expense retrieved successfully!"
+        "message": "Expense retrieved successfully!",
+        "data": expense_information
     }), 200 # OK
 
 # UPDATE AN EXISTING EXPENSE:
@@ -292,6 +312,45 @@ def delete_expense_by_id(expense_id):
         "message": "Deleted expense successfully!"
     }), 204 # No Content
 
+# ----- FRONTEND (with Flask & Jinga)-----Session 4 Project 111 (Here is when we add the following files (about, index--in the templates folder) in additon to the base.html file).
+# We need to create endpoint (with the same prior five steps that are needed for the creation of an endpoint: the decorator, the method, the path, the function name, and the return statement).
+# http://127.0.0.1:5000/home Note: Below, in order to get different URL endings to work (to render the same webpage), in the same endpoint, create different paths as shown below in the code:
+@app.get('/') # We are including a decorator, method we use is GET, the path is a forward slash home. When the user is visiting slash home, we want to render HTML. Note: Later we remove the word "home." Perhaps we could open ThunderClient and insert this URL there--you could do that, but remember that front-end has to do with the browser. Therefore, we need to open this URL by entering it in our browser URL window because we want to see a website page. So in your browser window, just open a new tab and enter the following in the URL window: http://127.0.0.1z:5000/home  So now, we are rendering html (by only using Flask, Python, and Jinja).
+@app.get('/index') 
+@app.get('/home')
+def home(): # The function name is home and it will return something: return ""
+    # logic here
+    my_name = "Snicker" # This shows how we can use logic to send data to an html file/page by using the code on this line and in the following line. Context refers to those variables we make available in the template. The context can be any data type. This will be in the second parameter in the render_template function below. Note: In the process of doing this, we are using essentially two different variables: the second one (referred to as the identifier) is used in the html file/page and in the second parameter of the render_template() function.
+    return render_template("index.html", name= my_name)   # The function will return an "html file" Python work with indentation--not curly braces, so indentation is important. If we want to return/render html, we need to use a special function: render_template()  Then we need to insert as a parameter what we want to render (an html file).  Therefore, we also need to create an html file to add to our project. But first, we need to create a folder named templates in which that file will be placed. Jinja will be working with files inside of the templates folder all the time.  It is a common practice to name that folder: templates (but it could have a different name--but you need to use additional steps to do so). Here, you don't need to provide both parameters (two parameters).
+
+# about.html should render <h1>about page</h1>
+
+# @app.get("/about")
+# def about():
+#     message = "This is the about page."
+#     return render_template("about.html", message= message) #"working on it"
+
+# send to the specified html page, a dictionary with your name, cohort, and year.
+@app.get('/about')
+def about():
+    # The data type we are sending now is a python dictionary:
+    student_data= {
+        "name": "Sergio",
+        "cohort": 65,
+        "year": 2026
+    }
+    return render_template("about.html", student_data=student_data)
+
+@app.get('/contact')
+def contact():
+
+    contact_info= {
+        "email": "contactpage123@flask.edu",
+        "phone": "(999)222-3333",
+        "mailing_address": "PO Box 555, Toledo Ohio, OH 55555"
+    }
+    # Note: To update this data, it's all done on this file and right here at this location.
+    return render_template("contact.html",contact_info= contact_info ) # Note: To access a value of an attribute in a dictionary, you can either use square brackets or a period/dot in the templates html page.
 if __name__ == "__main__": # This is the code needed to run this application/file. This code is always placed at the end of the file. This tells the API to only execute this file when we are in it, but not when we're in a different file or if and when we are importing this as a module. This essentially is a validation.
     init_db() # Here we are executing the function to create the DB table.
     app.run(debug=True) # This helps us with Hot Reload, so we don't need to stop and rerun the terminal.
